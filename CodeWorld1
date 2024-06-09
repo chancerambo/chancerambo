@@ -1,0 +1,81 @@
+import pygame
+import sys
+from pygame.locals import *
+
+# Initialize Pygame
+pygame.init()
+
+# Constants
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+FONT_SIZE = 32
+
+# Set up display
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption('CodeQuest')
+font = pygame.font.Font(None, FONT_SIZE)
+
+# Game variables
+current_screen = 'menu'
+user_input = ''
+output = ''
+
+# Functions to render text
+def draw_text(text, font, color, surface, x, y):
+    textobj = font.render(text, 1, color)
+    textrect = textobj.get_rect()
+    textrect.topleft = (x, y)
+    surface.blit(textobj, textrect)
+
+# Main menu screen
+def menu_screen():
+    screen.fill(WHITE)
+    draw_text('CodeQuest', font, BLACK, screen, 300, 100)
+    draw_text('Press any key to start', font, BLACK, screen, 250, 300)
+    pygame.display.update()
+
+# Puzzle screen
+def puzzle_screen(user_input, output):
+    screen.fill(WHITE)
+    draw_text('Solve the Puzzle:', font, BLACK, screen, 50, 50)
+    draw_text('Write a loop to place 10 planks:', font, BLACK, screen, 50, 100)
+    draw_text('Your Code:', font, BLACK, screen, 50, 150)
+    draw_text(user_input, font, BLACK, screen, 50, 200)
+    draw_text('Press Enter to simulate', font, BLACK, screen, 50, 300)
+    draw_text('Output:', font, BLACK, screen, 50, 350)
+    draw_text(output, font, BLACK, screen, 50, 400)
+    pygame.display.update()
+
+# Evaluate user code
+def evaluate_code(code):
+    try:
+        local_vars = {}
+        exec(code, {}, local_vars)
+        return "Code executed successfully"
+    except Exception as e:
+        return str(e)
+
+# Main game loop
+while True:
+    for event in pygame.event.get():
+        if event.type == QUIT:
+            pygame.quit()
+            sys.exit()
+        elif event.type == KEYDOWN:
+            if current_screen == 'menu':
+                current_screen = 'puzzle'
+            elif current_screen == 'puzzle':
+                if event.key == K_RETURN:
+                    output = evaluate_code(user_input)
+                    user_input = ''
+                elif event.key == K_BACKSPACE:
+                    user_input = user_input[:-1]
+                else:
+                    user_input += event.unicode
+
+    if current_screen == 'menu':
+        menu_screen()
+    elif current_screen == 'puzzle':
+        puzzle_screen(user_input, output)
